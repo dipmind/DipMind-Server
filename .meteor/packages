@@ -8,7 +8,6 @@ autopublish
 insecure
 cfs:filesystem
 cfs:standard-packages
-delgermurun:mediaelementjs
 standard-minifiers
 meteor-base
 mobile-experience
@@ -23,3 +22,4 @@ random
 ejson
 spacebars
 check
+my:mediaelementjs
