@@ -4,7 +4,7 @@ var os = Npm.require('os');
 var path = Npm.require('path');
 
 
-var IP_ADDRESS = '10.18.207.99'
+var IP_ADDRESS = '10.18.207.99' // indirizzo IP dell'iPad
 
 // numero di segmenti salvati per ogni pressione del BOTTONE
 var SAVED_SEGMENTS = 4 // pari!
@@ -27,18 +27,24 @@ var HLS_FFMPEG_TRANSCODE_CRF = 28
 var FFMPEG_TRANSCODE_PRESET = 'medium'
 var HLS_FFMPEG_TRANSCODE_PRESET = 'medium'
 
-var _id_mindwave_session = null
+
 
 //var TMP_ROOT = os.tmpdir();
 var TMP_ROOT = process.cwd().split('build')[0]
 //console.log(TMP_ROOT)
 var VIDEOS_PATH = path.join(TMP_ROOT, 'videos');
-var FFMPEG_PATH = path.join(TMP_ROOT, 'ffmpeg_rtsp');
-var FFMPEG_PATH_SAVED = path.join(FFMPEG_PATH, 'saved');
-var b = path.join(FFMPEG_PATH, 'seglist.m3u8');
-//console.log(VIDEOS_PATH)
-/*console.log(VIDEOS_PATH)
-console.log(FFMPEG_PATH)*/
+var FFMPEG_RTSP_PATH = path.join(TMP_ROOT, 'ffmpeg_rtsp');
+var FFMPEG_SAVED_PATH = path.join(FFMPEG_RTSP_PATH, 'saved');
+
+
+var MAIN_SERVER_PORT = 3003;
+var HLS_SERVER_PORT = 3004;
+
+
+/*
+ * Utilities per il filesystem
+ */
+
 var mkdirSync = function (path) {
 	try {
 		fs.mkdirSync(path);
@@ -59,9 +65,9 @@ var deleteFolderRecursive = function (dirPath) {
 		});
 		fs.rmdirSync(dirPath);
 	}
-};
+}
 
-var copyFile = function copyFile(source, target, cb) {
+var copyFile = function (source, target, cb) {
 	var cbCalled = false;
 
 	var rd = fs.createReadStream(source);
@@ -94,16 +100,17 @@ var copyListFile = function (list, sourcePath, targetPath, cb) {
 	return ok;
 }
 
-/* --------------------------- */
 
+
+var _id_mindwave_session = null;
 
 var mindwaveData = [];
 
 var spawn = Npm.require('child_process').spawn
 var ffmpeg
 
-mkdirSync(FFMPEG_PATH);
-mkdirSync(FFMPEG_PATH_SAVED);
+mkdirSync(FFMPEG_RTSP_PATH);
+mkdirSync(FFMPEG_SAVED_PATH);
 mkdirSync(VIDEOS_PATH);
 
 var tcp_connected = false;
@@ -116,17 +123,16 @@ var server = net.createServer(Meteor.bindEnvironment(function (socket) {
 			tcp_connected = true;
 			console.log('** serverTCP: receiving data from ' + socket.remoteAddress + ':' + socket.remotePort)
 
-			fs.closeSync(fs.openSync(path.join(FFMPEG_PATH, 'seglist.m3u8'), 'w'));
+			fs.closeSync(fs.openSync(path.join(FFMPEG_RTSP_PATH, 'seglist.m3u8'), 'w'));
 
-			console.log('** serverTCP: saving video files to ' + FFMPEG_PATH)
+			console.log('** serverTCP: saving video files to ' + FFMPEG_RTSP_PATH)
 
 			ffmpeg = spawn('ffmpeg', ('-y -i rtsp://' + IP_ADDRESS + ' -c:v copy -f segment -segment_format mp4 -segment_time ' +
 				SEGMENT_TIME + ' -segment_wrap ' + SEGMENT_WRAP + ' -segment_list_type csv -segment_list_size ' + SEGMENT_WRAP +
 				' -segment_list seglist.csv fragment-%03d.mp4' + ' -c:v libx264 -preset ' + HLS_FFMPEG_TRANSCODE_PRESET +
 				' -crf ' + HLS_FFMPEG_TRANSCODE_CRF + ' -f ssegment -segment_format mpegts -segment_time ' + HLS_SEGMENT_TIME +
 				' -segment_wrap ' + HLS_SEGMENT_WRAP + ' -segment_list_type m3u8 -segment_list_size ' + HLS_SEGMENT_WRAP +
-				' -segment_list seglist.m3u8 fragment-%03d.ts').split(' '), { cwd: FFMPEG_PATH });
-			//-segment_list_flags +live -segment_list_flags -cache
+				' -segment_list seglist.m3u8 fragment-%03d.ts').split(' '), { cwd: FFMPEG_RTSP_PATH });
 
 			ffmpeg.stdout.on('data', function (data) {
 				//console.log('stdout: ' + data);
@@ -137,27 +143,19 @@ var server = net.createServer(Meteor.bindEnvironment(function (socket) {
 			ffmpeg.on('close', function (code) {
 				//console.log('ffmpeg closed with ' + code);   
 			});
-			
-			
-
-			
-
-			/* --------------- */
-
 		}
 
 		if (data.length < 50) {
 			if (mindwaveData.length != 0) {
 				mindwaveData[mindwaveData.length - 1] = mindwaveData[mindwaveData.length - 1].concat([data])
 			} 
-			// se arriva blink per primo lo ignora.
 
+			// se arriva blink per primo lo ignora.
 			return;
 		}
 
 		if (mindwaveData.length < SEGMENT_TIME * SAVED_SEGMENTS) {
 			mindwaveData.push([data]);
-
 		} else {
 			mindwaveData.shift();
 			mindwaveData.push([data]);
@@ -166,7 +164,6 @@ var server = net.createServer(Meteor.bindEnvironment(function (socket) {
 		//console.log(JSON.parse(mindwaveData[mindwaveData.length - 1]));
 		//console.log(_id_mindwave_session);
 		if (_id_mindwave_session != null) {
-			//console.log('sono dentro');
 			//Meteor.bindEnvironment( function (data) {
 			//console.log('inserisco in ' + _id_mindwave_session + ' i dati ' + data)
 			mindwaveSession.update(
@@ -201,30 +198,33 @@ var server = net.createServer(Meteor.bindEnvironment(function (socket) {
 
 }, function () {/*console.log('BIND SU CREaTE serverTCP')*/ }));
 
-server.listen(3003, function () {
-	console.log('** serverTCP: listening on 3003.')
+server.listen(MAIN_SERVER_PORT, function () {
+	console.log('** serverTCP: listening on ' + MAIN_SERVER_PORT + '.')
 });
 
-/* hls file server */
+
+
+/*
+ * HLS file server
+ */
 
 var http = Npm.require('http'),
 	url = Npm.require('url');
 
-var mimeTypes = {
-    "html": "text/html",
-    "jpeg": "image/jpeg",
-    "jpg": "image/jpeg",
-    "png": "image/png",
-    "js": "text/javascript",
-    "css": "text/css",
-	"m3u8": "application/x-mpegURL",
-	"ts": "video/MP2T"
-};
-
 http.createServer(function (req, res) {
 	//console.log('** HLS file server: ' + req.url + ' requested');
+	var mimeTypes = {
+	    "html": "text/html",
+	    "jpeg": "image/jpeg",
+	    "jpg": "image/jpeg",
+	    "png": "image/png",
+	    "js": "text/javascript",
+	    "css": "text/css",
+		"m3u8": "application/x-mpegURL",
+		"ts": "video/MP2T"
+	};
+
     var uri = url.parse(req.url).pathname;
-    //var filename = path.join(FFMPEG_PATH, uri);
     var filename = path.join(TMP_ROOT, uri);
     fs.exists(filename, function (exists) {
         if (!exists) {
@@ -241,15 +241,14 @@ http.createServer(function (req, res) {
         fileStream.pipe(res);
 
     }); //end path.exists
-}).listen(3004, function () {
-	console.log('** HLS file server: listening for HLS file requests on 3004')
+}).listen(HLS_SERVER_PORT, function () {
+	console.log('** HLS file server: listening for HLS file requests on ' + HLS_SERVER_PORT + '.')
 });
 
 
 
 
-// //Riconosce os
-// console.log(process.platform);
+
 
 function createJSONVideoPlayer(command, url, time) {
 	var object = { "command": command, "url": url, "time": time }
@@ -262,7 +261,7 @@ Meteor.methods({
 		//number = number + '' + name;
 		console.log('** \'' + name + '\' pressed.');
 
-		var segmentlist_file = path.join(FFMPEG_PATH, 'seglist.csv');
+		var segmentlist_file = path.join(FFMPEG_RTSP_PATH, 'seglist.csv');
 
 		patientCode = 0;
 		var fileList;
@@ -306,7 +305,7 @@ Meteor.methods({
 		var timestamp = new Date();
 		var dirName = '' + timestamp.getFullYear() + ('0' + (timestamp.getMonth() + 1)).slice(-2) + ('0' + timestamp.getDate()).slice(-2) + '_' + patientCode + '_' + _id_mindwave_session;
 
-		mkdirSync(path.join(FFMPEG_PATH_SAVED, dirName));
+		mkdirSync(path.join(FFMPEG_SAVED_PATH, dirName));
 
 		var JSONMindwaveData = null;
 		var videoPath = null;
@@ -324,7 +323,7 @@ Meteor.methods({
 
 				watcher.close();
 				var copiedMindwaveData = [];
-				//var copy = spawn('cp', ['-vf'].concat(fileList.concat([path.join(FFMPEG_PATH_SAVED, number)])), {cwd:FFMPEG_PATH});
+				//var copy = spawn('cp', ['-vf'].concat(fileList.concat([path.join(FFMPEG_SAVED_PATH, number)])), {cwd:FFMPEG_RTSP_PATH});
 				var element;
 				for (var i = 0; i < mindwaveData.length; i++) {
 					element = []
@@ -346,10 +345,10 @@ Meteor.methods({
 					}
 		  		
 				//fa copy su tutta lista ma bisogna sostituire il copy con lo spawn e vedere se mettere come callback quello che c'e' su copy.on('exit')
-				//copyListFile(fileList, FFMPEG_PATH, path.join(FFMPEG_PATH_SAVED), function(error) {console.log(error)})
+				//copyListFile(fileList, FFMPEG_RTSP_PATH, path.join(FFMPEG_SAVED_PATH), function(error) {console.log(error)})
 				var numberCopied = 0;
 				for (var i = 0; i < fileList.length; i++) {
-					copyFile(path.join(FFMPEG_PATH, fileList[i]), path.join(FFMPEG_PATH_SAVED, dirName, fileList[i]), Meteor.bindEnvironment(function (error) {
+					copyFile(path.join(FFMPEG_RTSP_PATH, fileList[i]), path.join(FFMPEG_SAVED_PATH, dirName, fileList[i]), Meteor.bindEnvironment(function (error) {
 						if (error) {
 							console.log(error)
 						} else {
@@ -364,26 +363,26 @@ Meteor.methods({
 								}
 								//al posto del nome evento forse meglio id, se poi sara' configurabizzabile
 								var videoName = '' + ('0' + timestamp.getHours()).slice(-2) + ('0' + timestamp.getMinutes()).slice(-2) + ('0' + timestamp.getSeconds()).slice(-2) + '_' + name
-								fs.writeFileSync(path.join(path.join(FFMPEG_PATH_SAVED, dirName), 'list.txt'), stringFile);
+								fs.writeFileSync(path.join(path.join(FFMPEG_SAVED_PATH, dirName), 'list.txt'), stringFile);
 
 
 
 								var ffmpegMerge = spawn('ffmpeg', ('-y -f concat -i list.txt -c:v ' + FFMPEG_TRANSCODE_LIB +
-									' -preset ' + FFMPEG_TRANSCODE_PRESET + ' -crf ' + FFMPEG_TRANSCODE_CRF + ' ' + videoName + '.mp4').split(' '), { cwd: path.join(FFMPEG_PATH_SAVED, dirName) });
+									' -preset ' + FFMPEG_TRANSCODE_PRESET + ' -crf ' + FFMPEG_TRANSCODE_CRF + ' ' + videoName + '.mp4').split(' '), { cwd: path.join(FFMPEG_SAVED_PATH, dirName) });
 
 								ffmpegMerge.on('exit', Meteor.bindEnvironment(function (code) {
 
-									fs.unlinkSync(path.join(path.join(FFMPEG_PATH_SAVED, dirName), 'list.txt'));
+									fs.unlinkSync(path.join(path.join(FFMPEG_SAVED_PATH, dirName), 'list.txt'));
 
 									for (var i = 0; i < fileList.length; i++) {
 
-										fs.unlinkSync(path.join(path.join(FFMPEG_PATH_SAVED, dirName), fileList[i]));
+										fs.unlinkSync(path.join(path.join(FFMPEG_SAVED_PATH, dirName), fileList[i]));
 									}
 
 									if (code == 0) {
 										watcher.close();
 										ok = true;
-										videoPath = path.join(path.join(FFMPEG_PATH_SAVED, dirName), videoName + '.mp4');
+										videoPath = path.join(path.join(FFMPEG_SAVED_PATH, dirName), videoName + '.mp4');
 										console.log('** Saved: ' + videoPath);
 
 
@@ -403,7 +402,7 @@ Meteor.methods({
 									} else {
 										watcher.close();
 										ok = false;
-										console.log('Error saving ' + path.join(path.join(FFMPEG_PATH_SAVED, dirName), videoName + '.mp4'))
+										console.log('Error saving ' + path.join(path.join(FFMPEG_SAVED_PATH, dirName), videoName + '.mp4'))
 									}
 								}, function (e) { console.log("Error Environment 1"); console.log(e) }));
 
@@ -424,30 +423,30 @@ Meteor.methods({
 		   				}
 
 		   							
-		   				fs.writeFileSync(path.join(path.join(FFMPEG_PATH_SAVED, number),'list.txt'), stringFile) ;
+		   				fs.writeFileSync(path.join(path.join(FFMPEG_SAVED_PATH, number),'list.txt'), stringFile) ;
 
 		   				
 		  			
 		  				var ffmpegMerge = spawn('ffmpeg', ('-y -f concat -i list.txt -c:v ' + FFMPEG_TRANSCODE_LIB +
-		  					' -preset ' + FFMPEG_TRANSCODE_PRESET + ' -crf ' + FFMPEG_TRANSCODE_CRF + ' intero.mp4').split(' '), {cwd:path.join(FFMPEG_PATH_SAVED, number)});
+		  					' -preset ' + FFMPEG_TRANSCODE_PRESET + ' -crf ' + FFMPEG_TRANSCODE_CRF + ' intero.mp4').split(' '), {cwd:path.join(FFMPEG_SAVED_PATH, number)});
 
 		  				ffmpegMerge.on('exit', function (code) {
 		  					
-		  					fs.unlinkSync(path.join(path.join(FFMPEG_PATH_SAVED, number),'list.txt'));
+		  					fs.unlinkSync(path.join(path.join(FFMPEG_SAVED_PATH, number),'list.txt'));
 		  					
 		  					for (var i=0; i<fileList.length; i++) {
 		  						
-		   						fs.unlinkSync(path.join(path.join(FFMPEG_PATH_SAVED, number), fileList[i]));
+		   						fs.unlinkSync(path.join(path.join(FFMPEG_SAVED_PATH, number), fileList[i]));
 		   					}
 	
 		   					if (code == 0){
 		   						watcher.close();
 		   						ok=true;
-		   						console.log('Salvato ' + path.join(path.join(FFMPEG_PATH_SAVED, number),'intero.mp4'))
+		   						console.log('Salvato ' + path.join(path.join(FFMPEG_SAVED_PATH, number),'intero.mp4'))
 		   					} else {
 		   						watcher.close();
 		  						ok=false;
-		  						console.log('Errore nel salvataggiouo ' + path.join(path.join(FFMPEG_PATH_SAVED, number),'intero.mp4'))
+		  						console.log('Errore nel salvataggiouo ' + path.join(path.join(FFMPEG_SAVED_PATH, number),'intero.mp4'))
 		  					}
 		  				});
 

@@ -1,5 +1,8 @@
 var net = Npm.require('net');
 
+
+var VIDEOPLAYER_SERVER_PORT = 3005;
+
 clientSocketVideoPlayer = null;
 
 //Serve a inviare i comandi play stop seek ad ipad
@@ -28,6 +31,6 @@ videoPlayerTCPServer = net.createServer(function(socket) {
 		
 });
 
-videoPlayerTCPServer.listen(3005, function() {
-	console.log('** videoplayerTCP: waiting for connection on 3005.') 
+videoPlayerTCPServer.listen(VIDEOPLAYER_SERVER_PORT, function() {
+	console.log('** videoplayerTCP: waiting for connection on ' + VIDEOPLAYER_SERVER_PORT + '.') 
 });
