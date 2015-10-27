@@ -13,9 +13,9 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.1.0.2');
   api.use('jquery');
-  api.addAssets('lib/mediaelement-and-player.js', 'client');
-  api.addAssets('lib/mediaelementplayer.css', 'client');
-  api.addAssets('lib/mejs-skins.css', 'client');
+  api.addFiles('lib/mediaelement-and-player.js', 'client');
+  api.addFiles('lib/mediaelementplayer.css', 'client');
+  api.addFiles('lib/mejs-skins.css', 'client');
   api.addAssets('lib/skipback.png', 'client');
   api.addAssets('lib/silverlightmediaelement.xap', 'client');
   api.addAssets('lib/loading.gif', 'client');
@@ -33,8 +33,8 @@ Package.onUse(function(api) {
   api.addAssets('lib/background.png', 'client');
 });
 
-Package.onTest(function(api) {
+/*Package.onTest(function(api) {
   api.use('tinytest');
   api.use('my:mediaelementjs');
   api.addFiles('mediaelementjs-tests.js');
-});
+});*/
