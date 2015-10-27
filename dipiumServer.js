@@ -25,69 +25,48 @@ if (Meteor.isClient) {
 		}
 	})
 
-	Template.hello.events({
-		
+	Template.hello.events({	
 		'click #startButton': function () {
-			// increment the counter when button is clicked
-			console.log("start")
+			Meteor.call('start_session')
 			Meteor.call('command_video', 'start', "", "" )
 		},
 		'click #stopButton': function () {
-			// increment the counter when button is clicked
+			Meteor.call('stop_session')
 			Meteor.call('command_video', 'stop', "", "" )
 		},
-		'change #fileUpload': function(event,template){ 
-			/*var file = event.target.files[0]; //assuming 1 file only
-			var name = event.target.value.split("\\").slice(-1)[0]
-			if (!file) return;
-	
-			var reader = new FileReader(); //create a reader according to HTML5 File API
-	
-			reader.onload = function(event){          
-				//var buffer = new Uint8Array(reader.result) // convert to binary
-				Meteor.call('videoUpload', event.srcElement.result, name, function(a){
-					if (a){
-						console.log(a)
-					}
-					console.log(a)
-				});
-			}
-	
-			reader.readAsBinaryString(file); //read the file as arraybuffer
-
-		}*/
-		FS.Utility.eachFile(event, function(file) {
-			videoUpload.insert(file, function (err, fileObj) {
-				//console.log('file uploaded to server...prepare to convert it');
-				// Inserted new doc with ID fileObj._id, and kicked off the data upload using HTTP
-				videoList.insert({_id: fileObj._id, "originalName": fileObj.name(), "segmented": "no"}, function(error, idVideo) {
-					if (error) {
-						//Facciamo che non succedera' mai
-					} else {
-						var handle = videoList.find({_id: idVideo}).observeChanges({
-							changed: function(id, fields) {
-								if (fields.segmented == "yes" && id == idVideo) {
-									console.log("File converted successfully")
-									handle.stop()
+		'change #fileUpload': function(event,template) { 
+			FS.Utility.eachFile(event, function(file) {
+				videoUpload.insert(file, function (err, fileObj) {
+					//console.log('file uploaded to server...prepare to convert it');
+					// Inserted new doc with ID fileObj._id, and kicked off the data upload using HTTP
+					videoList.insert({_id: fileObj._id, "originalName": fileObj.name(), "segmented": "no"}, function(error, idVideo) {
+						if (error) {
+							//Facciamo che non succedera' mai
+						} else {
+							var handle = videoList.find({_id: idVideo}).observeChanges({
+								changed: function(id, fields) {
+									if (fields.segmented == "yes" && id == idVideo) {
+										console.log("File converted successfully")
+										handle.stop()
+									}
+								},
+								removed: function(id) {
+									if (id == idVideo) {
+										console.log("Error in conversion file")
+										handle.stop()
+									}
 								}
-							},
-							removed: function(id) {
-								if (id == idVideo) {
-									console.log("Error in conversion file")
-									handle.stop()
-								}
-							}
-						})
-					}
-					
+							})
+						}
+						
+					});
+
+
+					//Meteor.call('transformUploadedVideo', fileObj._id);
+					//console.log(fileObj.name())
 				});
-
-
-				//Meteor.call('transformUploadedVideo', fileObj._id);
-				//console.log(fileObj.name())
 			});
-		});
-	}
+		}
 	})
 
 	////////////

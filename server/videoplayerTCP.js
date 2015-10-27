@@ -1,7 +1,7 @@
 var net = Npm.require('net');
 
 
-var VIDEOPLAYER_SERVER_PORT = 3005;
+/*var VIDEOPLAYER_SERVER_PORT = 3005;
 
 clientSocketVideoPlayer = null;
 
@@ -33,4 +33,4 @@ videoPlayerTCPServer = net.createServer(function(socket) {
 
 videoPlayerTCPServer.listen(VIDEOPLAYER_SERVER_PORT, function() {
 	console.log('** videoplayerTCP: waiting for connection on ' + VIDEOPLAYER_SERVER_PORT + '.') 
-});
+});*/
