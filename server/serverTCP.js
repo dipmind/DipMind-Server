@@ -11,7 +11,7 @@ var SAVED_SEGMENTS = 4 // pari!
 
 
 var SEGMENT_TIME = 2
-var HLS_SEGMENT_TIME = 1
+var HLS_SEGMENT_TIME = 4
 
 // numero di segmenti mantenuti nella finestra temporale (almeno il doppio di SAVED_SEGMENTS)
 var SEGMENT_WRAP = 8
@@ -25,7 +25,7 @@ var FFMPEG_TRANSCODE_LIB = 'libx264'
 var FFMPEG_TRANSCODE_CRF = 26
 var HLS_FFMPEG_TRANSCODE_CRF = 28
 var FFMPEG_TRANSCODE_PRESET = 'medium'
-var HLS_FFMPEG_TRANSCODE_PRESET = 'medium'
+var HLS_FFMPEG_TRANSCODE_PRESET = 'ultrafast'
 
 
 
@@ -34,7 +34,8 @@ var TMP_ROOT = process.cwd().split('build')[0]
 //console.log(TMP_ROOT)
 var VIDEOS_PATH = path.join(TMP_ROOT, 'videos')
 var FFMPEG_RTSP_PATH = path.join(TMP_ROOT, 'ffmpeg_rtsp')
-var FFMPEG_SAVED_PATH = path.join(FFMPEG_RTSP_PATH, 'saved')
+//var FFMPEG_SAVED_PATH = path.join(FFMPEG_RTSP_PATH, 'saved')
+var FFMPEG_SAVED_PATH = path.join(TMP_ROOT, 'event_videos')
 
 
 var MAIN_SERVER_PORT = 3003
@@ -105,7 +106,7 @@ var copyListFile = function (list, sourcePath, targetPath, cb) {
 var spawn = Npm.require('child_process').spawn
 
 
-mkdirSync(FFMPEG_RTSP_PATH)
+
 mkdirSync(FFMPEG_SAVED_PATH)
 mkdirSync(VIDEOS_PATH)
 
@@ -165,9 +166,10 @@ var mindwaveData = []
 
 var tcp_connected = false
 
-var session_server
+var session_server = null
+var videoPlayerTCPServer = null
 var session_sockets = []
-var ffmpeg
+var ffmpeg = null
 var watcher = null
 var session_on = false
 var _id_mindwave_session
@@ -406,19 +408,22 @@ Meteor.methods({
 		for (sock in session_sockets)
 			session_sockets[sock].destroy()
 
-		session_server.close(function(error) {
-			if (error)
-				console.log("** serverTCP: session_server error while closing.")
-		})
+		if (session_server !== null)
+			session_server.close(function(error) {
+				if (error)
+					console.log("** serverTCP: session_server error while closing.")
+			})
 
-		videoPlayerTCPServer.close(function(error) {
-			if (error)
-				console.log("** serverTCP: videoPlayerTCPServer error while closing.")
-		})
+		if (videoPlayerTCPServer !== null)
+			videoPlayerTCPServer.close(function(error) {
+				if (error)
+					console.log("** serverTCP: videoPlayerTCPServer error while closing.")
+			})
 
 		session_sockets = []
 
-		ffmpeg.kill('SIGINT')
+		if (ffmpeg !== null)
+			ffmpeg.kill('SIGINT')
 
 		if(watcher !== null)
 			watcher.close()
@@ -433,6 +438,9 @@ Meteor.methods({
 		var HOST = IP_ADDRESS
 		var PORT = 6969
 
+		deleteFolderRecursive(FFMPEG_RTSP_PATH);
+		mkdirSync(FFMPEG_RTSP_PATH)
+
 		var client = new net.Socket()
 		client.connect(PORT, HOST, function () {
 			console.log('** Sending server IP to: ' + HOST + ':' + PORT)
@@ -443,8 +451,12 @@ Meteor.methods({
 			client.destroy()
 		})
 		
-		client.on('close', Meteor.bindEnvironment(function () {
-			console.log('** Done')
+		client.on('close', Meteor.bindEnvironment(function (had_error) {
+
+			if (had_error)
+				return
+
+			console.log('** clientConnection: connection SUCCESSFUL')
 
 			session_server = net.createServer(Meteor.bindEnvironment(function (socket) {
 				console.log('** serverTCP: connected to ' + socket.remoteAddress + ':' + socket.remotePort)
@@ -452,7 +464,7 @@ Meteor.methods({
 				session_sockets.push(socket)
 
 				socket.on('data', Meteor.bindEnvironment(function (data) {
-					if (session_on == true){
+					//if (session_on == true){
 						if (tcp_connected == false) {
 							tcp_connected = true
 							console.log('** serverTCP: receiving data from ' + socket.remoteAddress + ':' + socket.remotePort)
@@ -467,12 +479,19 @@ Meteor.methods({
 								' -crf ' + HLS_FFMPEG_TRANSCODE_CRF + ' -f ssegment -segment_format mpegts -segment_time ' + HLS_SEGMENT_TIME +
 								' -segment_wrap ' + HLS_SEGMENT_WRAP + ' -segment_list_type m3u8 -segment_list_size ' + HLS_SEGMENT_WRAP +
 								' -segment_list seglist.m3u8 fragment-%03d.ts').split(' '), { cwd: FFMPEG_RTSP_PATH })
+
+							/*ffmpeg = spawn('ffmpeg', ('-y -i rtsp://' + IP_ADDRESS + ' -c:v copy -f segment -segment_format mp4 -segment_time ' +
+								SEGMENT_TIME + ' -segment_wrap ' + SEGMENT_WRAP + ' -segment_list_type csv -segment_list_size ' + SEGMENT_WRAP +
+								' -segment_list seglist.csv fragment-%03d.mp4' + ' -c:v copy -f ssegment -segment_format mpegts -segment_time ' + HLS_SEGMENT_TIME +
+								' -segment_wrap ' + HLS_SEGMENT_WRAP + ' -segment_list_type m3u8 -segment_list_size ' + HLS_SEGMENT_WRAP +
+								' -segment_list seglist.m3u8 fragment-%03d.ts').split(' '), { cwd: FFMPEG_RTSP_PATH })*/
+	
 	
 							ffmpeg.stdout.on('data', function (data) {
-								//console.log('stdout: ' + data)
+								console.log('stdout: ' + data)
 							})
 							ffmpeg.stderr.on('data', function (data) {
-								//console.log('stderr: ' + data)
+								console.log('stderr: ' + data)
 							})
 							ffmpeg.on('close', function (code) {
 								console.log('ffmpeg closed with ' + code)
@@ -484,41 +503,45 @@ Meteor.methods({
 							  console.log("ffmpeg stderr:\n" + stderr)
 							})
 						}
-	
-						if (data.length < 50) {
-							if (mindwaveData.length != 0) {
-								mindwaveData[mindwaveData.length - 1] = mindwaveData[mindwaveData.length - 1].concat([data])
-							} 
-	
-							// se arriva blink per primo lo ignora.
-							return
-						}
-	
-						if (mindwaveData.length < SEGMENT_TIME * SAVED_SEGMENTS) {
-							mindwaveData.push([data])
-						} else {
-							mindwaveData.shift()
-							mindwaveData.push([data])
-						}
 						
-						//console.log(JSON.parse(mindwaveData[mindwaveData.length - 1]))
-						//console.log(_id_mindwave_session)
-						if (_id_mindwave_session != null) {
-							//Meteor.bindEnvironment( function (data) {
-							//console.log('inserisco in ' + _id_mindwave_session + ' i dati ' + data)
-							mindwaveSession.update(
-								{ "_id": _id_mindwave_session },
-								{ $push: { "sessionData": JSON.parse(data) } },
-								function () {
-									//console.log('saved session data')
-								})
-							//}, function () {console.log('ERRROR BINDING SESSION DATA SAVE')} )
-	
+						if (!("hb" in JSON.parse(data))) {
+
+
+							if (data.length < 50) {
+								if (mindwaveData.length != 0) {
+									mindwaveData[mindwaveData.length - 1] = mindwaveData[mindwaveData.length - 1].concat([data])
+								} 
+		
+								// se arriva blink per primo lo ignora.
+								return
+							}
+		
+							if (mindwaveData.length < SEGMENT_TIME * SAVED_SEGMENTS) {
+								mindwaveData.push([data])
+							} else {
+								mindwaveData.shift()
+								mindwaveData.push([data])
+							}
+							
+							//console.log(JSON.parse(mindwaveData[mindwaveData.length - 1]))
+							//console.log(_id_mindwave_session)
+							if (_id_mindwave_session != null) {
+								//Meteor.bindEnvironment( function (data) {
+								//console.log('inserisco in ' + _id_mindwave_session + ' i dati ' + data)
+								mindwaveSession.update(
+									{ "_id": _id_mindwave_session },
+									{ $push: { "sessionData": JSON.parse(data) } },
+									function () {
+										//console.log('saved session data')
+									})
+								//}, function () {console.log('ERRROR BINDING SESSION DATA SAVE')} )
+		
+							}
 						}
-					}
+					//}
 
 
-				}, function () { console.log('ERRROR BINDING SESSION DATA SAVE') })); // socket.on data
+				}, function (err) { console.log('ERRROR BINDING SESSION DATA SAVE'); console.log(err) })); // socket.on data
 
 				socket.on('error', function () {
 					console.log('** serverTCP: socket error, ' + socket.remoteAddress + ':' + socket.remotePort)
@@ -532,9 +555,13 @@ Meteor.methods({
 					console.log('** serverTCP: socket end')
 				})
 
-				socket.on('timeout', function (data) {
+				socket.setTimeout(5000);
+
+				socket.on('timeout', Meteor.bindEnvironment(function (data) {
 					console.log('** serverTCP: socket timeout, ' + socket.remoteAddress + ':' + socket.remotePort)
-				})
+
+					Meteor.call('stop_session')
+				}, function(error, data) {if (error ) console.log("timeout " + error)}))
 
 			}, function () {/*console.log('BIND SU CREaTE serverTCP')*/ }))
 
@@ -581,7 +608,7 @@ Meteor.methods({
 		}, function () {console.log('BIND SU CREaTE client') }))
 
 		client.on('error', function () {
-			console.log('ERRORE')
+			console.log('** clientConnection: connection FAILED')
 		})
 	}
 
@@ -592,7 +619,7 @@ Meteor.methods({
   // do something
   console.log("uploaded "+fileObj._id)
 });*/
-
+//Evento legato ad upload file
 videoUpload.on('stored', Meteor.bindEnvironment(function (fileObj) {
 	// do something
 	//bindEnvironment penso serva a temporizzare adeguatamente tutto (suggerito da meteor stesso)
