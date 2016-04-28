@@ -1,0 +1,73 @@
+/* CSS per pagina di gestione video/playlist */
+
+.video-item {
+	max-width: 100px;
+	overflow: hidden;
+}
+
+.video-item img {
+   border-radius: 3px;
+   border: solid #DDDDDD 1px;
+	height: 50px;
+	max-width: 50px;
+}
+
+
+#playlistList .scroll-vertical-menu-fixed {
+	height: 200px;
+}
+
+@media (min-height: 700px) {
+   #playlistList .scroll-vertical-menu-fixed {
+   		height: 250px;
+   }
+}
+
+@media (min-height: 750px) {
+   #playlistList .scroll-vertical-menu-fixed {
+   		height: 300px;
+   }
+}
+
+
+/*
+ * Lista orizzontale con 'wrap'
+ */
+
+#videoPlaylistList .scroll-horizontal-menu {
+   height: 200px;
+}
+
+@media (min-height: 700px) {
+   #videoPlaylistList .scroll-horizontal-menu {
+         height: 250px;
+   }
+}
+
+@media (min-height: 750px) {
+   #videoPlaylistList .scroll-horizontal-menu {
+         height: 300px;
+   }
+}
+
+#videoPlaylistList .scroll-horizontal-menu {
+   white-space: normal;
+   overflow-x: hidden;
+   overflow-y: scroll;
+   /*visibility: hidden;*/
+   -webkit-overflow-scrolling: touch;
+   -moz-overflow-scrolling: touch;
+   -ms-overflow-scrolling: touch;
+   -o-overflow-scrolling: touch;
+   overflow-scrolling: touch;
+}
+
+#videoPlaylistList .scroll-horizontal-menu .list-group-item {
+   border-left: 0 none;
+   margin: 5px 0;
+   margin-left: -4px;
+}
+
+#addVideoListModal input.form-control[type="file"] {
+   height: auto;
+}

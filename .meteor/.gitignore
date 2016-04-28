@@ -1,1 +1,6 @@
-local
+local/*
+!local/crossdomain.xml
+!local/screenshotIpad.png
+!local/videos
+local/videos/*
+!local/videos/emptyThumbnail.png

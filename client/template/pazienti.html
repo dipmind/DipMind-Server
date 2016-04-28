@@ -1,0 +1,266 @@
+<!-- Template per route /pazienti e figli -->
+
+<template name="patients">
+	{{#app}}
+		{{> backButton destination="home" destinationName="Home"}}
+		<div class="container">
+			<div class="row">
+				{{#list listId="patientList" sectionTitle="Pazienti" addBtn=true width=4 offset=4}}
+					{{#sortable items=patientData options=sortableOpts}}
+						<a href="{{destAddr}}" class="list-group-item hvr-fade patientListItem" >
+							<h5>
+								<span>{{fullName}}</span>
+								<span class="pull-right">
+									<a class="hvr-grow nounderline glyphicon glyphicon-pencil" aria-hidden="true"></a>
+									<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+								</span>
+							</h5>
+							{{dateString}}
+						</a>
+					{{/sortable}}	
+				{{/list}}
+			</div>
+		</div>
+	{{/app}}
+
+	{{#modal title="Aggiungi Paziente" id="patientListModalAdd"}}
+		{{> addPatient}}
+	{{/modal}}
+
+	{{#modal title="Modifica dati del paziente" id="patientListModalMod"}}
+		{{> modPatient}}
+	{{/modal}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverPlusButton">
+		<div class="user-help">
+			Aggiungi un nuovo paziente
+		</div>				
+	</div>
+	<div class="hidden" id="popoverList">
+		<div class="user-help">
+			Scegli un paziente per mostrare le sedute a cui ha preso parte
+		</div>	
+	</div>
+	<div class="hidden" id="popoverListLegend">
+			<div class="user-help">
+				<div>
+					Fai clic su <span class="glyphicon glyphicon-pencil"></span> per modificare i dati del paziente,
+					e su <span class="glyphicon glyphicon-trash"></span> per eliminarlo dalla lista
+				</div>
+			</div>	
+	</div>
+</template>
+
+<!-- Template per aggiunta nuovo paziente -->
+<template name="addPatient">
+	<form class="form" data-toggle="validator" role="form" >
+		<label for="patientName" class="control-label">Nome</label>
+		<div class="form-group">
+			<div >
+			 	<input type="text" class="form-control" name="patientName" placeholder="nome" autocomplete="off" autocorrect="off">
+			</div> 
+		</div>
+		<label for="patientSurname" class="control-label">Cognome</label>
+		<div class="form-group">
+			<div>
+			 	<input type="text" class="form-control" name="patientSurname" placeholder="cognome" autocomplete="off" autocorrect="off">
+			</div>
+		</div>
+		<label for="patientBirthdate" class="control-label">Data di nascita</label>
+		<div class="form-group">
+			<div>
+			 	<input type="text" class="form-control" name="patientBirthdate" placeholder="gg/mm/aaaa" autocomplete="off" autocorrect="off">
+			</div>
+		</div>
+		<div class="form-group modal-form-footer-right">
+			<button type="button" class="btn btn-default " data-dismiss="modal">Annulla</button>
+			<button type="submit" class="btn btn-primary">Salva</button>	
+		</div>
+	</form>
+</template>
+
+<!-- Template per modifica dati paziente -->
+<template name="modPatient">
+	<form class="form" data-toggle="validator" role="form" >
+		<label for="patientName" class="control-label">Nome</label>
+		<div class="form-group">
+			<div >
+			 	<input type="text" class="form-control" name="patientName" placeholder="" autocomplete="off" autocorrect="off">
+			</div> 
+		</div>
+		<label for="patientSurname" class="control-label">Cognome</label>
+		<div class="form-group">
+			<div>
+			 	<input type="text" class="form-control" name="patientSurname" placeholder="" autocomplete="off" autocorrect="off">
+			</div>
+		</div>
+		<label for="patientBirthdate" class="control-label">Data di nascita</label>
+		<div class="form-group">
+			<div>
+			 	<input type="text" class="form-control" name="patientBirthdate" placeholder="" autocomplete="off" autocorrect="off">
+			</div>
+		</div>
+		<div class="form-group modal-form-footer-right">
+			<button type="button" class="btn btn-default " data-dismiss="modal">Annulla</button>
+			<button type="submit" class="btn btn-primary">Salva</button>	
+		</div>
+	</form>
+</template>
+
+<!-- Template con lista delle sedute del paziente -->
+<template name="patientDetails">
+	{{#app}}
+		{{> backButton destination="patients" destinationName="Pazienti"}}
+		<div class="container">
+			<div class="row">
+				{{#list listId="patientSessionList" sectionTitle=listTitle addBtn=false width=4 offset=4}}
+					{{#sortable items=sessions options=sortableOpts}}
+						<a href="{{destAddr}}" class="list-group-item hvr-fade patientSessionListItem" >
+							<h5>
+								<span>{{sessionDateString}}<span style="padding-left:1em; font-size:0.9em;">{{sessionHourString}}</span></span>
+								<span class="pull-right">
+									<a class="hvr-grow glyphicon glyphicon-save nounderline" href="{{downloadPath}}" aria-hidden="true"></a>
+									<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+								</span>
+							</h5>
+							<div><div>
+							{{#if isZero eventNumber}}
+							Nessun evento
+							{{else}}
+							{{eventNumber}} event{{#if isOne eventNumber}}o{{else}}i{{/if}}
+							{{/if}}</div><div><small>Tenuta da</small> {{ownerName}}</div></div>
+						</a>
+					{{/sortable}}	
+				{{/list}}
+			</div>
+		</div>
+	{{/app}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverList">
+		<div class="user-help">
+			Scegli una seduta in cui sono stati registrati eventi per mostrare i video associati
+		</div>	
+	</div>
+	<div class="hidden" id="popoverListLegend">
+		<div class="user-help">
+			<div>
+				Fai clic su <span class="glyphicon glyphicon-save"></span> per scaricare i dati della seduta,
+				e su <span class="glyphicon glyphicon-trash"></span> per cancellarla
+			</div>
+		</div>	
+	</div>
+</template>
+
+<!-- Template con dettagli di ogni seduta e lista eventi -->
+<template name="patientSessions">
+	{{#app}}
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-6 col-lg-6 col-sm-6">
+					<a href="{{pathFor 'patientDetails' id=patientId}}" id="backBtn" class="nounderline"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>{{patientName}}</a>
+				</div>
+			</div>
+		</div> 
+		<div class="container" id="eventsContainer">
+			<div class="row">
+				<div class="col-lg-6 col-md-6 col-sm-6">
+					<div class="row">
+						<div class="col-lg-10 col-md-10 col-sm-10 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+							<div class="container-fluid" id="sessionInfoContainer">
+								<div class="panel panel-default">
+									<div class="panel-body">
+									{{#with session}}
+										<table class="sessionInfo">
+										   <tr>
+										    <td>Paziente</td>
+										    <td>{{patientName}}</td>
+										  </tr>
+										  <tr>
+										    <td>Data e ora</td>
+										    <td>{{dateString}}  {{dateHourString}}</td>
+										  </tr>
+										   <tr>
+										    <td>Durata</td>
+										    <td>{{sessionDuration}}</td>
+										  </tr>
+										  <tr>
+										    <td>Stato</td>
+										    <td>{{status}}</td>
+										  </tr>
+										   <tr>
+										    <td>Tenuta da</td>
+										    <td>{{ownerName}}</td>
+										  </tr>
+										   <tr>
+										    <td>Playlist</td>
+										    <td>{{playlistName}} <small>di</small> {{playlistOwnerName}}</td>
+										  </tr>
+										   <tr>
+										    <td>Totale eventi</td>
+										    <td>{{eventNumber}}</td>
+										  </tr>
+										 </table>
+									{{/with}}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4 col-md-4 col-sm-4 col-lg-offset-1 col-md-offset-1 col-sm-offset-1">
+					<div class="row">
+						{{#list listId="sessionEventList" sectionTitle="Eventi" addBtn=false width=12 fixed=true}}
+							{{#sortable items=events options=sortableOpts}}
+								<a href="#" class="list-group-item hvr-fade sessionEventListItem" >
+									<div>
+										<span>{{eventName}}<small style="padding-left:1em;">{{eventHourString}}</small></span>
+										<span class="pull-right">
+											<a class="hvr-grow glyphicon glyphicon-save nounderline" href="{{downloadPath}}" aria-hidden="true"></a>
+											<a class="hvr-grow glyphicon glyphicon-trash nounderline" aria-hidden="true"></a>
+										</span>
+									</div>
+								</a>
+							{{/sortable}}	
+						{{/list}}
+					</div>
+				</div>
+			</div>
+			<div class="row hidden" id="eventVideoContainer">
+				<div class="col-lg-5 col-md-5 col-sm-5 col-lg-offset-1 col-md-offset-1 col-sm-offset-1" >
+					<video id="streamingPlayer"  height="250" width="100%"></video>
+				</div>
+				<div class="col-lg-5 col-md-5 col-sm-5 ">
+					<video  id="playlistPlayer" height="250" width="100%"></video>
+				</div>
+			</div>
+		</div>
+	{{/app}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverInfo">
+		<div class="user-help">
+			Informazioni riguardanti la seduta
+		</div>	
+	</div>
+	<div class="hidden" id="popoverList">
+		<div class="user-help">
+			Scegli un evento per mostrare i frammenti di video associati
+		</div>	
+	</div>
+	<div class="hidden" id="popoverListLegend">
+		<div class="user-help">
+			<div>
+				Fai clic su <span class="glyphicon glyphicon-save"></span> per scaricare i dati relativi all'evento,
+				e su <span class="glyphicon glyphicon-trash"></span> per eliminarlo
+			</div>
+		</div>	
+	</div>
+</template>

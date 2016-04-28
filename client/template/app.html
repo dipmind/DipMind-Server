@@ -1,0 +1,139 @@
+<!-- Contiene i template usati più di frequente -->
+<!-- App, Navigation Bar, backButton, listItem, list, modal -->
+
+<!-- Titolo della applicazione -->
+<head>
+	<title>DipMind</title>
+</head>
+
+<!-- Template contenitore per impostare la navigation bar e il div animato -->
+<template name="app">
+	{{> navigationBar}}
+
+	<div id="root">
+		{{> Template.contentBlock}}
+	</div>
+
+	<div id="wrongWidth">
+		<div class="container">
+			<h4>La larghezza della finestra non è sufficiente per il corretto funzionamento dell'applicazione</h4>
+		</div>
+	</div>
+</template>
+
+<!-- Navigation Bar -->
+<template name="navigationBar">
+	<div class="navbar navbar-default" role="navigation">
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><a href="/home" id="homeBtn"><span class="glyphicon glyphicon-home" aria-hidden="true"></span></a></li>
+				<li id="navbar-help">
+					<a href="#">
+						Aiuto
+						<span class="glyphicon glyphicon-question-sign pull-right"></span>
+					</a>
+					<div class="overlay hidden"></div>
+					<div class="overlay overlay-top hidden"></div>	
+				</li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				{{> loginButtons}}
+			</ul>
+		</div>
+	</div>
+</template>
+
+<!-- Pulsante di ritorno -->
+<template name="backButton">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-6 col-lg-6 col-sm-6">
+				<a href="{{pathFor destination}}" id="backBtn" class="nounderline"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>{{destinationName}}</a>
+			</div>
+		</div>
+	</div>
+</template>
+
+<!-- Singolo elemento di lista -->
+<template name="listItem">
+	<a href="#" class="list-group-item hvr-fade" >
+		<span>
+			{{#if item.listText}}
+				{{item.listText}}
+			{{else}}
+				{{item.profile.listText}}
+			{{/if}} 
+			 {{#if showTrash}}
+				<a class="hvr-grow pull-right"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+			{{/if}}
+			{{#if showModify}}
+				<a class="hvr-grow pull-right"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+			{{/if}}	
+		</span>
+	</a>
+</template>
+
+<!-- Lista -->
+<template name="list">
+	<div id="{{listId}}" class="{{#if width}}col-lg-{{width}}  col-md-{{width}} col-sm-{{width}} {{/if}}
+	{{#if offset}} col-md-offset-{{offset}} col-lg-offset-{{offset}} col-sm-offset-{{offset}} {{/if}} {{otherClasses}}">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">
+					{{#if addBtn}}
+						<a href="#" class="glyphicon glyphicon-plus pull-right addBtn" aria-hidden="true" ></a>
+					{{/if}}
+					{{#if sectionTitle}}
+					{{sectionTitle}}
+					{{else}}
+					&nbsp;
+					{{/if}}
+				</h3>
+			</div>
+			<div class="panel-body list-group {{#if horizontal}} list-group-horizontal scroll-horizontal-menu {{else}} {{#if fixed}} scroll-vertical-menu-fixed {{else}} scroll-vertical-menu{{/if}}{{/if}}">
+			 	{{> Template.contentBlock}}
+		  	</div>
+		</div> 
+	</div>
+</template>
+
+<!-- Modale generico -->
+<template name="modal">
+	<div class="modal fade" id="{{id}}">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Annulla"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title">{{title}}</h4>
+				</div>
+				<div class="modal-body">
+					{{> Template.contentBlock}}
+				</div>			
+			</div>
+		</div>
+	</div>
+</template>
+
+<!-- Modale di conferma cancellazione -->
+<template name="confirmDelete">
+	{{#modal id=idDelete title=titleDelete}}
+		<p>{{msgDelete}}</p>
+		<div class="modal-form-footer-right">
+			<button type="button" class="btn btn-default " data-dismiss="modal">Annulla</button>
+			<button type="submit" class="btn btn-primary">Conferma</button>
+		</div>
+	{{/modal}}
+</template>
+
+<!-- Caricamento -->
+<template name='loading'>
+	{{#app}}
+		<div class="container">
+			<div class="row">
+				<div class="col-md-offset-4 col-lg-offset-4 col-sm-offset-4 col-md-4 col-lg-4 col-sm-4">
+					<h5 class="text-center">Caricamento...</h5>
+				</div>
+			</div>
+		</div>
+	{{/app}}
+</template>

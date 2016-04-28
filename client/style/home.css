@@ -1,0 +1,18 @@
+/* CSS per gestione menu home e settings --> per template homeSection */
+
+.noselect {
+	-webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.nounderline{
+	color: inherit;
+}
+
+.nounderline:hover{
+	text-decoration: none;
+	color: inherit;
+}

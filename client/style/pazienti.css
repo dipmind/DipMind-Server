@@ -1,0 +1,31 @@
+/* CSS per lista pazienti/lista sedute/dettagli seduta */
+
+#eventsContainer > .row:first-child {
+	margin-bottom: 30px;
+}
+
+#eventsContainer .scroll-vertical-menu-fixed {
+	height: 250px;
+
+}
+
+table.sessionInfo {
+	width:100%;
+}
+
+
+table.sessionInfo td {
+	padding:5px 0;
+}
+
+table.sessionInfo td:first-child {
+	text-align: right;
+	padding-right: 0.5em;
+	font-size: 0.85em;
+	color: gray;
+}
+
+table.sessionInfo td:last-child {
+	padding-left: 0.5em;
+	text-align: left;
+}

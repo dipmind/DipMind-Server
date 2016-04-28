@@ -18,6 +18,7 @@ var mejs = mejs || {};
 // version number
 mejs.version = '2.16.4'; 
 
+var hostnameAddr = this.location.origin
 
 // player number (for missing, same id attr)
 mejs.meIndex = 0;
@@ -541,6 +542,7 @@ mejs.PluginMediaElement.prototype = {
 			if (this.pluginType == 'youtube' || this.pluginType == 'vimeo') {
 				this.pluginApi.playVideo();
 			} else {
+				this.pluginApi.loadMedia();
 				this.pluginApi.playMedia();
 			}
 			this.paused = false;
@@ -933,11 +935,13 @@ mejs.HtmlMediaElementShim = {
 		}
 
 		// clean up attributes
-		src = 		(typeof src == 'undefined' 	|| src === null || src == '') ? null : src;		
+		//src = 		(typeof src == 'undefined' 	|| src === null || src == '') ? null : src;		
+		src = 		(typeof src == 'undefined' 	|| src === null || src == '') ? ((options.myDynamicUrl!== undefined)? options.myDynamicUrl: null) : src;
 		poster =	(typeof poster == 'undefined' 	|| poster === null) ? '' : poster;
 		preload = 	(typeof preload == 'undefined' 	|| preload === null || preload === 'false') ? 'none' : preload;
 		autoplay = 	!(typeof autoplay == 'undefined' || autoplay === null || autoplay === 'false');
 		controls = 	!(typeof controls == 'undefined' || controls === null || controls === 'false');
+
 
 		// test for HTML5 and plugin capabilities
 		playback = this.determinePlayback(htmlMediaElement, options, mejs.MediaFeatures.supportsMediaTag, isMediaTag, src);
@@ -986,12 +990,13 @@ mejs.HtmlMediaElementShim = {
 
 		// supplied type overrides <video type> and <source type>
 		if (typeof options.type != 'undefined' && options.type !== '') {
-			
+
 			// accept either string or array of types
 			if (typeof options.type == 'string') {
+
 				mediaFiles.push({type:options.type, url:src});
 			} else {
-				
+
 				for (i=0; i<options.type.length; i++) {
 					mediaFiles.push({type:options.type[i], url:src});
 				}
@@ -999,11 +1004,13 @@ mejs.HtmlMediaElementShim = {
 
 		// test for src attribute first
 		} else if (src !== null) {
+
 			type = this.formatType(src, htmlMediaElement.getAttribute('type'));
 			mediaFiles.push({type:type, url:src});
 
 		// then test for <source> elements
 		} else {
+
 			// test <source> types to see if they are usable
 			for (i = 0; i < htmlMediaElement.childNodes.length; i++) {
 				n = htmlMediaElement.childNodes[i];
@@ -1018,7 +1025,10 @@ mejs.HtmlMediaElementShim = {
 				}
 			}
 		}
-		
+
+
+
+		//src = "http://www.streambox.fr/playlists/test_001/stream.m3u8"
 		// in the case of dynamicly created players
 		// check for audio types
 		if (!isMediaTag && mediaFiles.length > 0 && mediaFiles[0].url !== null && this.getTypeFromFile(mediaFiles[0].url).indexOf('audio') > -1) {
@@ -1349,7 +1359,7 @@ mejs.HtmlMediaElementShim = {
 'type="application/x-shockwave-flash" pluginspage="//www.macromedia.com/go/getflashplayer" ' +
 //'src="' + options.pluginPath + options.flashName + '" ' +
 //'src="/' + options.flashName + '" ' +
-'src="http://localhost:3000/packages/my_mediaelementjs/lib/flashmediaelement.swf"' + 
+'src="' + hostnameAddr + '/packages/my_mediaelementjs/lib/flashmediaelement.swf"' + 
 'flashvars="' + initVars.join('&') + '" ' +
 'width="' + width + '" ' +
 'height="' + height + '" ' +

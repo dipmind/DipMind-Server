@@ -1,0 +1,75 @@
+<!-- Template per /home -->
+<!-- homeSection, homeQuickstart -->
+
+<!-- Singola sezione di un menu (usata anche in /settings) -->
+<template name="homeSection">
+	<a href="{{pathFor destination}}" class="nounderline" tabindex="0" role="button" data-container="body" data-toggle="popover" data-placement="bottom" data-content="" data-trigger="focus">
+		<div class="panel panel-default noselect hvr-outline-in">
+			<div class="panel-heading">
+	    		<h3 class="panel-title"><span class="glyphicon glyphicon-{{type}} pull-right" aria-hidden="true"></span>{{sectionTitle}}</h3>
+	  		</div>
+		  	<div class="panel-body">
+		    	{{sectionContent}}
+		  	</div>
+		</div>
+	</a>
+</template>
+
+<!-- Template per il menu principale -->
+<template name="homeQuickstart">
+	{{#app}}
+		<div class="container" id="homeQuickstart">
+			<div class="row">
+			{{#if showAdminMenu}}
+				<div class="col-md-3 col-lg-3 col-sm-3">
+					{{> homeSection sectionTitle="Pazienti" sectionContent="Aggiungi nuovi pazienti o modifica i dettagli di quelli già inseriti, rivedi le sedute e gli eventi registrati" type="user" destination="patients"}}
+				</div>
+				<div class="col-md-3 col-lg-3 col-sm-3">
+					{{> homeSection sectionTitle="Video e Playlist" sectionContent="Gestisci le tue playlist o carica nuovi video" type="film" destination="videoPage"}}
+				</div>
+				<div class="col-md-3 col-lg-3 col-sm-3">
+					{{> homeSection sectionTitle="Seduta" sectionContent="Inizia una nuova seduta con Mindwave e iPad" type="headphones" destination="sessionSetup" sessionMenuItem=true}}
+				</div>
+				<div class="col-md-3 col-lg-3 col-sm-3">
+					{{> homeSection sectionTitle="Impostazioni" sectionContent="Aggiungi o rimuovi utenti e gestisci gli eventi registrabili durante una seduta" type="cog" destination="settings"}}
+				</div>
+			{{else}}
+				<div class="col-md-4 col-lg-4 col-sm-4">
+					{{> homeSection sectionTitle="Pazienti" sectionContent="Aggiungi nuovi pazienti o modifica i dettagli di quelli già inseriti, rivedi le sedute e gli eventi registrati" type="user" destination="patients"}}
+				</div>
+				<div class="col-md-4 col-lg-4 col-sm-4">
+					{{> homeSection sectionTitle="Video e Playlist" sectionContent="Gestisci le tue playlist o carica nuovi video" type="film" destination="videoPage"}}
+				</div>
+				<div class="col-md-4 col-lg-4 col-sm-4">
+					{{> homeSection sectionTitle="Seduta" sectionContent="Inizia una nuova seduta con Mindwave e iPad" type="headphones" destination="sessionSetup" sessionMenuItem=true}}
+				</div>
+			{{/if}}
+			</div>
+		</div>
+	{{/app}}
+
+
+	<!-- 
+	   -	Popover di help
+	 -->
+	<div class="hidden" id="popoverHomeButton">
+		<div class="user-help">
+			Torna alla Home
+		</div>				
+	</div>
+	<div class="hidden" id="popoverHelpButton">
+		<div class="user-help">
+			Mostra un aiuto
+		</div>	
+	</div>
+	<div class="hidden" id="popoverLoginButton">
+		<div class="user-help">
+			Modifica la tua password o esci
+		</div>	
+	</div>
+	<div class="hidden" id="popoverChoice">
+		<div class="user-help">
+			Cosa vuoi fare? 
+		</div>				
+	</div>
+</template>

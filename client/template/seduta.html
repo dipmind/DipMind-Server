@@ -1,0 +1,322 @@
+<!-- Template per la route /session -->
+<!-- session -->
+
+<!-- Template per wizard di configurazione seduta -->
+<template name="sessionSetup">
+	{{#app}}
+		<div class="container">
+			{{> wizard id="wizard" steps=sessionSteps stepsTemplate="steps_semanticUI" route="sessionSetup"}}
+		</div>
+	{{/app}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverWizard">
+		<div class="user-help broad">
+			<div>Segui i passaggi per inserire i parametri necessari allo svolgimento della seduta. Puoi rivedere in ogni momento le tue scelte facendo clic su 'Indietro' o sul nome di un passaggio completato.</div>
+		</div>	
+	</div>
+</template>
+
+<template name="wizardRoot">
+	<div id="wizardRoot" class="container hidden">
+		{{> Template.contentBlock}}
+	</div>
+</template>
+
+<template name="steps_semanticUI">
+	<div class="ui four steps">
+		{{#each wizard.steps}}
+			<div class="{{stepClass id}} step">
+				{{#if icon}}<i class="glyphicon glyphicon-{{iconType}}"></i>{{/if}}
+				<div class="content">
+					{{#if wizard.route}}
+						<a href="{{pathForStep id}}" class="title" id="titleWizard{{id}}">{{title}}</a>
+					{{else}}
+						<div class="title">{{title}}</div>
+					{{/if}}
+				</div>
+			</div>
+		{{/each}}
+	</div>
+</template>
+
+
+<!-- Template per pagina di inserimento IP dell'iPad -->
+<template name="setupIP">
+	{{#wizardRoot}}
+		<form data-toggle="validator" role="form" id="formSetupIP">
+			<div class="row">
+				<div class="col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-lg-10 col-md-10 col-sm-10">
+					<label for="IPAddressName" class="control-label">Indirizzo IP</label>
+					<div class="form-group">
+						<div >
+						 	<input type="text" class="form-control" name="IPAddressName" placeholder="xxx.xxx.xxx.xxx" autocomplete="off" autocorrect="off">
+						</div> 
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-offset-3 col-md-offset-3 col-sm-offset-3 col-lg-6 col-md-6 col-sm-6">
+					<h4 style="text-align:center;"><small>L'indirizzo IP da inserire lo trovi sull'iPad, nella sezione 'Strumenti' della app, come mostrato nella figura sottostante</small></h4>
+					<img src="{{screenSrc}}" class="img-responsive">
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-lg-10 col-md-10 col-sm-10">
+					<div class="form-group">
+						<button type="submit" class="btn btn-primary wizard-next-button pull-right"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate pull-right hidden" id="waitConnGlyph"></span>Imposta</button>
+					</div>
+				</div>
+			</div>
+
+		</form>
+	{{/wizardRoot}}
+</template>
+
+<!-- Template di scelta del paziente -->
+<template name="setupPatient">
+	{{#wizardRoot}}
+		<form data-toggle="validator" role="form" id="formSetupPatient">
+			<div class="row">
+				<div class="col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-lg-10 col-md-10 col-sm-10">
+					<div class="form-group">
+						{{#list listId="setupPatientList" sectionTitle="Scegli paziente"  width=4 offset=4}}
+							{{#each p in setupPatientListData}}	
+								<div class="list-group-item radio">
+									<label>
+									{{#if checkedBefore obj=p}}
+									    <input type="radio" name="optionsPatient" value="{{p._id}}" checked>
+									{{else}}
+										<input type="radio" name="optionsPatient" value="{{p._id}}">
+									{{/if}}
+									    {{p.name}} {{p.surname}}
+									  </label>
+								</div>
+							{{/each}}
+						{{/list}}
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="form-group">
+					<div class="col-lg-1  col-md-1 col-sm-1">
+						<button type="button" class="btn btn-default wizard-back-button">Indietro</button>
+					</div>
+					<div class="col-lg-1  col-md-1 col-sm-1 col-md-offset-10 col-lg-offset-10 col-sm-offset-10">
+						<button type="submit" class="btn btn-primary wizard-next-button pull-right">Avanti</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	{{/wizardRoot}}
+</template>
+
+<!-- Template di scelta della playlist -->
+<template name="setupPlaylist">
+	{{#wizardRoot}}
+		<form data-toggle="validator" role="form" id="formSetupPlaylist">
+			<div class="row">
+				<div class="col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-lg-10 col-md-10 col-sm-10">
+					<div class="form-group">
+						{{#list listId="setupPlaylistList" sectionTitle="Scegli playlist"  width=4 offset=4}}
+							{{#each p in setupPlaylistListData}}	
+								<div class="list-group-item radio">
+									<label>
+									    {{#if checkedBefore obj=p}}
+										    <input type="radio" name="optionsPlaylist" value="{{p._id}}" checked>
+										{{else}}
+											<input type="radio" name="optionsPlaylist" value="{{p._id}}">
+										{{/if}}
+									    {{p.name}} <small>di</small> {{ownerName obj=p}}
+									  </label>
+								</div>
+							{{/each}}
+						{{/list}}
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="form-group">
+					<div class="col-lg-1  col-md-1 col-sm-1">
+						<button type="button" class="btn btn-default wizard-back-button">Indietro</button>
+					</div>
+					<div class="col-lg-1  col-md-1 col-sm-1 col-md-offset-10 col-lg-offset-10 col-sm-offset-10">
+						<button type="submit" class="btn btn-primary wizard-next-button pull-right">Avanti</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	{{/wizardRoot}}
+</template>
+
+<!-- Template di resoconto -->
+<template name="checkout">
+	{{#wizardRoot}}
+		<form>
+			<div class="row">
+				<div class="col-lg-4 col-lg-offset-4  col-md-4 col-md-offset-4 col-sm-4 col-sm-offset-4">
+					<div class="panel panel-default" id="checkoutPanel">
+						<div class="panel-heading">
+							<h3 class="panel-title">Resoconto</h3>
+						</div>
+						<div class="panel-body">
+							<label for="checkoutAddressIP" class="control-label">Indirizzo IP</label>
+							<p name="checkoutAddressIP">{{addressIP}}</p>
+							<label for="checkoutPazient" class="control-label">Paziente</label>
+							<p name="checkoutPazient">{{patientName}}</p>
+							<label for="checkoutPlaylist" class="control-label">Playlist</label>
+							{{#with playlistChosen}}	
+								<p name="checkoutPlaylist">{{name}} <small>di</small> {{ownerName}}</p>
+							{{/with}}
+						</div>
+					</div>
+					<div><p id="checkoutError" class="txt-danger hidden">Errore nell'inizializzazione della seduta. Ripetere la configurazione.</p></div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="form-group">
+					<div class="col-lg-1  col-md-1 col-sm-1">
+						<button type="button" class="btn btn-default wizard-back-button">Indietro</button>
+					</div>
+					<div class="col-lg-1  col-md-1 col-sm-1 col-md-offset-10 col-lg-offset-10 col-sm-offset-10">
+						<button type="button" class="btn btn-primary wizard-next-button pull-right">Inizia seduta</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	{{/wizardRoot}}
+</template>
+
+<!-- Template per la console della seduta -->
+<template name="session">
+	{{#app}}
+		<div class="container" id="sessionContainer">
+			<div class="row">
+				<div class="col-md-12 col-lg-12 col-sm-12">
+				<!-- Video e bottoni seduta -->
+					<div class="row">
+						<div class="col-md-6 col-lg-6 col-sm-6">
+							<div class="disable consoleControl" id="playerContainer">
+								<video id="playlistPlayer" class="consoleControl" height="270"></video>
+							</div>
+						</div>
+						<div class="col-md-5 col-lg-5 col-sm-5 col-md-offset-1 col-lg-offset-1 col-sm-offset-1">
+							<div class="row">
+								<div class="col-md-10 col-lg-10 col-sm-10 col-md-offset-1 col-lg-offset-1 col-sm-offset-1">
+									<div id="startStop" class="container-fluid">
+										<div class="btn-group-vertical" role="group">
+											<button class="btn btn-default consoleControl {{statusStart}}" id="startBtn"><span class="glyphicon glyphicon-play" aria-hidden="true"></span>Inizia seduta</button>
+											<button class="btn btn-default disabled consoleControl {{statusStop}}" id="stopBtn"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span>Termina seduta</button>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-12 col-lg-12 col-sm-12 ">
+									<div class="jumbotron" id="status">
+										<div class="list-group-horizontal">
+											<div class="list-group-item">
+												<div class="led led-{{sessionLedColor}}"></div>
+											</div>
+											<div class="list-group-item">
+												<div id="msgConsole"></div>
+											</div>
+										</div>
+										<div id="deviceStatus">							
+											<div class="panel panel-default">
+												<div class="panel-body">
+													iPad<span class="led led-{{iPadLedColor}} pull-right"></span>
+												</div>
+											</div>
+											<div class="panel panel-default">
+												<div class="panel-body">
+													Mindwave<span class="led led-{{mindwaveLedColor}} pull-right"></span>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				<!-- lista e bottoni evento -->
+					<div class="row" id="bottomRow">
+						{{#list listId="videoPlaylistList" sectionTitle=playlistTitle width=4 fixed=true}}
+							{{#sortable items=playlistData options=videoOpts}}
+								<a href="#" class="list-group-item videoListItem consoleControl">
+								<div class="media">
+									<div class="media-left media-middle">
+										<img src="{{thumbnailPath}}" class="media-object" height="50" width="50">
+									</div>
+									<div class="media-body">
+										<div class="media-heading">
+											{{name}}<span class="glyphPlayed glyphicon {{#unless playNow}} hidden {{else}} {{glyphHidden}} {{/unless}} pull-right"></span>
+										</div>
+										<div>
+											<small>Durata: {{duration}}</small>
+										</div>
+									</div>
+								</div>
+								</a>
+							{{/sortable}}	
+						{{/list}}
+						<div class="col-md-6 col-lg-6 col-sm-6 col-md-offset-2 col-lg-offset-2 col-sm-offset-2">
+							<div id="eventsPanel" class="panel panel-default">
+								<div class="panel-heading">
+									<h3 class="panel-title">
+										Eventi
+									</h3>
+								</div>
+								<div class="panel-body">
+									{{#each e in active}}
+										<div class="btn-group" role="group">
+											<button type="button" class="btn btn-default {{disableBtn}} consoleControl consoleBtn" data-id="{{e._id}}">{{e.name}}<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate pull-right hidden"></span></button>
+										</div>
+									{{/each}}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="navbar navbar-default navbar-fixed-bottom">
+		 		 <div class="container">
+		  			<p>Paziente: <strong>{{patientName}}</strong></p>
+		  		</div>
+			</div>
+		</div>
+	{{/app}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverPlaylist">
+		<div class="user-help narrow">
+			Trascina i video per cambiare l'ordine di riproduzione
+		</div>				
+	</div>
+	<div class="hidden" id="popoverVideo">
+		<div class="user-help">
+			Video in riproduzione sull'iPad
+		</div>	
+	</div>
+	<div class="hidden" id="popoverStartStop">
+		<div class="user-help">
+			Fai clic su <span class="glyphicon glyphicon-play"></span> per avviare una seduta,
+			e su <span class="glyphicon glyphicon-stop"></span> per terminarla
+		</div>	
+	</div>
+	<div class="hidden" id="popoverStatus">
+		<div class="user-help narrow">
+			Informazioni riguardo lo stato della seduta e dei dispositivi
+		</div>	
+	</div>
+	<div class="hidden" id="popoverEvents">
+		<div class="user-help">
+			Fai clic sul nome di un evento per indicare che è avvenuto
+		</div>	
+	</div>
+</template>

@@ -1,0 +1,166 @@
+<!-- Template per la route /settings e figli -->
+<!-- settings, userForm, userManagement -->
+
+
+<!-- Template per il menu settings (usa homeSection da home.html) -->
+<template name="settings">
+	{{#app}}
+		{{> backButton destination="home" destinationName="Home"}}
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4 col-lg-4 col-sm-4 col-md-offset-2 col-lg-offset-2 col-sm-offset-2">
+					{{> homeSection sectionTitle="Gestione utenti" sectionContent="Aggiungi o rimuovi utenti" type="user" destination="userManagement"}}
+				</div>
+				<div class="col-md-4 col-lg-4 col-sm-4">
+					{{> homeSection sectionTitle="Gestione eventi" sectionContent="Aggiungi o modifica gli eventi registrabili durante una seduta" type="pushpin" destination="eventManagement"}}
+				</div>
+			</div>
+		</div>
+	{{/app}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverChoice">
+		<div class="user-help">
+			Cosa vuoi fare? 
+		</div>				
+	</div>
+</template>
+
+
+<!-- template per lista utenti -->
+<template name="userManagement">
+	{{#app}}
+		{{> backButton destination="settings" destinationName="Impostazioni"}}
+		<div class="container">
+			<div class="row">
+				{{#list listId="userList" sectionTitle="Utenti" addBtn=true width=4 offset=4}}
+					{{#sortable items=userData options=sortableOpts}}
+						<a href="#" class="list-group-item hvr-fade userListItem" >
+							<h5>
+								<span>{{username}}</span>
+								<span class="pull-right">
+									<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+								</span>
+							</h5>
+						</a>
+					{{/sortable}}	
+				{{/list}}
+			</div>
+		</div>
+	{{/app}}
+
+	{{#modal title="Aggiungi utente" id="userListModal"}}
+		{{> userForm}}
+	{{/modal}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverPlusButton">
+		<div class="user-help">
+			Aggiungi un nuovo utente
+		</div>				
+	</div>
+	<div class="hidden" id="popoverListLegend">
+		<div class="user-help">
+			<div>
+				Fai clic su <span class="glyphicon glyphicon-trash"></span> per eliminare un utente
+			</div>
+		</div>	
+	</div>
+</template>
+
+<!-- Template per form con aggiunta utente-->
+<template name="userForm">
+	<form data-toggle="validator" role="form" >
+		<div class="form-group form-input">
+			 <input type="text" class="form-control" name="username" placeholder="Username" autocomplete="off" autocorrect="off">
+		</div>
+		<div class="form-group modal-form-footer-right">
+			<button type="button" class="btn btn-default " data-dismiss="modal">Annulla</button>
+			<button type="submit" class="btn btn-primary">Salva</button>
+		</div>
+	</form>
+</template>
+
+
+<!-- Template per gestione Eventi -->
+<template name="eventManagement">
+	{{#app}}
+		{{> backButton destination="settings" destinationName="Impostazioni"}}
+		<div class="container">
+		    <div class="row">
+		    	{{#list listId="availableEventList" sectionTitle="Eventi non attivi" addBtn=true width=4 offset=2 fixed=true}}
+					{{#sortable items=availableEvents options=availableOpts}}
+						<a href="#" class="list-group-item hvr-fade availableEventListItem" >
+							<h5>
+								<span>{{name}}</span>
+								<span class="pull-right">
+									<a class="hvr-grow nounderline glyphicon glyphicon-pencil" aria-hidden="true"></a>
+									<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+								</span>
+							</h5>
+						</a>
+					{{/sortable}}
+				{{/list}}
+				{{#list listId="activeEventList" sectionTitle="Eventi attivi" addBtn=false width=4 offset=0 fixed=true}}
+					{{#sortable items=activeEvents options=activeOpts}}
+						<a href="#" class="list-group-item hvr-fade activeEventListItem" >
+							<h5>
+								<span>{{name}}</span>
+								<span class="pull-right">
+									<a class="hvr-grow nounderline glyphicon glyphicon-pencil" aria-hidden="true"></a>
+									<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+								</span>
+							</h5>
+						</a>
+					{{/sortable}}
+				{{/list}}
+		    </div>
+		</div>   
+	{{/app}}
+
+	{{#modal title="Aggiungi evento" id="addEventListModal"}}
+		{{> eventForm name="addEventName" add=true}}
+	{{/modal}}
+
+	{{#modal title="Modifica nome evento" id="modifyEventListModal"}}
+		{{> eventForm name="modifyEventName" add=false}}
+	{{/modal}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverPlusButton">
+		<div class="user-help">
+			Aggiungi un nuovo tipo di evento
+		</div>				
+	</div>
+	<div class="hidden" id="popoverListLegend">
+		<div class="user-help narrow">
+			Fai clic su <span class="glyphicon glyphicon-pencil"></span> per rinominare un evento,
+			e su <span class="glyphicon glyphicon-trash"></span> per eliminarlo
+		</div>	
+	</div>
+	<div class="hidden" id="popoverChoice">
+		<div class="user-help">
+			Trascina gli eventi da una lista all'altra per selezionare quali rendere attivi
+		</div>				
+	</div>
+</template>
+
+<!-- template per aggiunta eventi -->
+<template name="eventForm">
+	<form data-toggle="validator" role="form" >
+		<div class="form-group form-input">
+			 <input type="text" class="form-control" name="{{name}}" placeholder="Nome evento" autocomplete="off" autocorrect="off">
+		</div>
+		<div class="form-group modal-form-footer-right">	
+			<button type="button" class="btn btn-default " data-dismiss="modal">Annulla</button>
+			<button type="submit" class="btn btn-primary">Salva</button>
+		</div>
+	</form>
+</template>
+

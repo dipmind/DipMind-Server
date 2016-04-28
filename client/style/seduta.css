@@ -1,0 +1,263 @@
+/* CSS per pagina 'console' della seduta */
+
+.feedbackIcon {
+	padding-right: 10%;
+}
+
+.led {
+    margin: 5px auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.25);
+    box-shadow: #000 0 -1px 6px 1px;
+    display: inline-flex;
+}
+.led-red {
+    background-color: #F00;
+    box-shadow: #7D7B80 0 -1px 6px 1px, inset #600 0 -1px 3px, #F00 0 3px 11px;
+}
+.led-orange {
+    background-color: #FF7000;
+    box-shadow: #7D7B80 0 -1px 6px 1px, inset #630 0 -1px 8px, #FF7000 0 3px 11px;
+}
+
+.led-yellow {
+    background-color: #FF0;
+    box-shadow: #7D7B80 0 -1px 6px 1px, inset #660 0 -1px 8px, #FF0 0 3px 11px;
+}
+
+.led-green {
+    background-color: #80FF00;
+    box-shadow: #7D7B80 0 -1px 6px 1px, inset #460 0 -1px 3px, #80FF00 0 3px 11px;
+}
+
+.led-blue {
+    background-color: #06F;
+    box-shadow: #7D7B80 0 -1px 6px 1px, inset #006 0 -1px 8px, #06F 0 3px 11px;
+}
+
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -ms-animation: spin .7s infinite linear;
+    -webkit-animation: spinw .7s infinite linear;
+    -moz-animation: spinm .7s infinite linear;
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+  
+@-webkit-keyframes spinw {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@-moz-keyframes spinm {
+    from { -moz-transform: rotate(0deg);}
+    to { -moz-transform: rotate(360deg);}
+}
+
+/*.mejs-container .mejs-controls { visibility:hidden !important; }
+.mejs-overlay-button {display: none;}*/
+
+.hidePlayerControls {
+    visibility:hidden !important;
+}
+
+#loadingIcon {
+    z-index: 1
+}
+
+
+#root > .container#sessionContainer {
+    margin-top: 25px;
+}
+
+#playerContainer {
+    height: 270px; 
+}
+
+#sessionContainer > .row > * > .row {
+    margin-bottom: 25px;
+}
+
+
+#startStop > .btn-group-vertical {
+   box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.05);
+   width:80%;
+   margin-left: 10%;
+   margin-right: 10%;
+   overflow: hidden;
+}
+
+@media (min-width: 992px) {
+    #startStop > .btn-group-vertical {
+   width:60%;
+   margin-left: 20%;
+   margin-right: 20%;
+}
+
+}
+
+#startStop.container-fluid {
+    margin-bottom: 30px;
+    margin-top: 10px;
+}
+
+#startStop.container-fluid .glyphicon {
+   font-size: 1.1em;
+   margin-right: 0.5em;
+}
+
+#startStop > .btn-group-vertical > button {
+    padding: 12px;
+    white-space: normal;
+}
+
+
+#bottomRow > #videoPlaylistList .scroll-vertical-menu-fixed {
+    height: 250px;
+}
+
+#status.jumbotron {
+    margin: 0 10px;
+    padding:10px;
+}
+
+#status.jumbotron  .panel {
+    display: inline-block;
+    margin: 5px 5px 0 5px;
+    padding:5px;
+    box-shadow: none;
+    font-size: 0.9em;
+}
+
+#status.jumbotron  .panel > .panel-body {
+    padding: 0 5px;
+}
+
+#status.jumbotron .list-group-horizontal {
+    padding: 0 5px;
+    height:80px;
+    width:100%;
+    text-align: center;
+    display: block;
+}
+
+#status.jumbotron .list-group-horizontal .list-group-item {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-left:-5px;
+    margin-right: 0;
+    height: 100%;
+    vertical-align: middle;
+   
+}
+
+#status.jumbotron .list-group-horizontal .list-group-item:first-child {
+    border-top-right-radius:0;
+    border-bottom-left-radius:4px;
+    width:15%;
+    text-align: center; 
+    margin-left:0px;
+}
+
+#status.jumbotron .list-group-horizontal .list-group-item:first-child .led {
+    margin: 25px 0;
+}
+
+#status.jumbotron .list-group-horizontal .list-group-item:last-child {
+    border-top-right-radius:4px;
+    border-bottom-left-radius:0;
+    width:85%;
+    white-space: normal;
+}
+
+#deviceStatus {
+    text-align: center;
+}
+
+#deviceStatus > div {
+    display: inline-block;
+    width: 45%; 
+    text-align: left; 
+}
+
+
+.navbar-fixed-bottom {
+    min-height: 30px;
+    text-align: center;
+}
+
+.navbar-fixed-bottom p {
+   margin-top: 0.5em;
+   margin-bottom: 0.5em;
+}
+
+
+#eventsPanel {
+    margin-top: 25px;
+}
+
+#eventsPanel > .panel-body {
+    overflow-y: scroll;
+    height: 200px;
+
+}
+
+#eventsPanel .btn-group {
+    margin-top:0px;
+    margin-bottom: 8px;
+    margin-left: 3px;
+    margin-right: 3px;
+
+}
+
+.container > #wizard {
+    margin-top: -25px;
+}
+
+.list-group-item.radio {
+    margin-top: 0;
+}
+
+#wizard .panel-title .form-control-feedback {
+    position: relative;
+    float: right !important;
+    padding-right: 0;
+    
+    line-height: 1em;
+    width: auto;
+    height: auto;
+
+}
+
+#wizard .panel .list-group-item {
+    color:inherit;
+}
+
+#formSetupIP > button + .row {
+    min-height: 100px;
+}
+
+#wizard > .ui.steps {
+    margin-bottom:30px;
+}
+
+
+
+#formSetupIP > button + .row + .row {
+    margin-bottom: 40px
+}
+
+#checkoutPanel p {
+    padding-left: 2em
+}
+
+.disabled {
+    cursor: default !important;
+    box-shadow: none !important;
+    opacity: 0.65 !important;
+}

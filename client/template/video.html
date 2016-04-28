@@ -1,0 +1,210 @@
+<!-- Template per la route /video -->
+<!-- video -->
+
+<template name="videoPage">
+	{{#app}}
+		{{> backButton destination="home" destinationName="Home"}}
+		<div class="container">
+			<div class="row">
+				{{#list listId="videoList" sectionTitle="Archivio video" addBtn=true width=10 offset=1 horizontal=true}}
+					{{#sortable items=videoData options=videoOpts}}
+						<a href="#" class="list-group-item hvr-fade videoListItem">
+							<div class="video-item">
+								<div>{{name}}</div>
+								<img src="{{thumbnailPath}}">
+								<div>
+								<small>Durata: {{duration}}</small>
+								</div>
+								<div>
+									{{#if isOwner}}
+									<span>
+										<a class="hvr-grow nounderline glyphicon glyphicon-pencil" aria-hidden="true"></a>
+										<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+									</span>
+									{{else}}
+									<span>
+										&nbsp;
+									</span>
+									{{/if}}
+								</div>
+							</div>
+						</a>
+					{{/sortable}}	
+				{{/list}}
+			</div>
+			<div class="row" id="playlistRow">
+				{{#list listId="playlistList" sectionTitle="Playlist" addBtn=true width=3 offset=1 fixed=true}}
+					{{#sortable items=playlistData options=playlistOpts}}
+						<a href="#" class="list-group-item hvr-fade playlistListItem" data-parent="playlistList">
+							<h5>{{name}}
+								<span class="pull-right">
+									<a class="hvr-grow nounderline glyphicon glyphicon-pencil" aria-hidden="true"></a>
+									<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+								</span>
+							</h5>
+						</a>
+					{{/sortable}}	
+				{{/list}}
+				{{> playlistView}}
+			</div>
+		</div>
+	{{/app}}
+
+	{{#modal id="addVideoListModal" title="Carica video"}}
+		{{> videoForm name="addVideoName" add=true}}
+	{{/modal}}
+
+	{{#modal id="modifyVideoListModal" title="Modifica nome video"}}
+		{{> videoForm name="modifyVideoName" add=false}}
+	{{/modal}}
+
+	{{#modal id="addPlaylistListModal" title="Aggiungi playlist"}}
+		{{> playlistForm name="addPlaylistName" add=true}}
+	{{/modal}}
+
+	{{#modal id="modifyPlaylistListModal" title="Modifica nome playlist"}}
+		{{> playlistForm name="modifyPlaylistName" add=false}}
+	{{/modal}}
+
+	{{> loadingVideo}}
+
+	<!-- 
+	   -	Popover di help  
+	 -->
+	<div class="hidden" id="popoverVideoListPlus">
+		<div class="user-help">
+			Carica un nuovo video
+		</div>				
+	</div>
+	<div class="hidden" id="popoverPlaylistListPlus">
+		<div class="user-help">
+			Crea una nuova playlist
+		</div>	
+	</div>
+	<div class="hidden" id="popoverPlaylistList">
+		<div class="user-help">
+			Clicca su una playlist per visualizzarla e modificarla
+		</div>	
+	</div>
+	<div class="hidden" id="popoverPlaylistListLegend">
+		<div class="user-help">
+			Fai clic su <span class="glyphicon glyphicon-pencil"></span> per rinominare una playlist,
+			e su <span class="glyphicon glyphicon-trash"></span> per eliminarla
+		</div>	
+	</div>
+	<div class="hidden" id="popoverPlaylistVideoList">
+		<div class="user-help">
+			Trascina i video da <strong>Archivio video</strong> per aggiungerli alla playlist precedentemente selezionata
+		</div>	
+	</div>
+	<div class="hidden" id="popoverPlaylistVideoListLegend">
+		<div class="user-help">
+			Fai clic su <span class="glyphicon glyphicon-trash"></span> per rimuovere un video dalla playlist
+		</div>	
+	</div>
+	<div class="hidden" id="popoverListLegend">
+		<div class="user-help">
+			Fai clic su <span class="glyphicon glyphicon-pencil"></span> per rinominare un video,
+			e su <span class="glyphicon glyphicon-trash"></span> per eliminarlo
+		</div>	
+	</div>
+</template>
+
+<!-- Template per visualizzazione dello stato di caricamento/conversione video -->
+<template name="loadingVideo">
+	<div class="modal fade" id="loadingVideoModal" data-backdrop="false">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Caricamento del video</h4>
+				</div>
+				<div class="modal-body">
+					{{#with video}}
+					<label for="progressBar">Salvataggio</label>
+					<div class="progress">
+					  <div class="progress-bar progress-bar-{{uploadColor}}" name="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: {{progressLoad}}%; min-width: 2em;">
+					    {{progressLoad}}%
+					  </div>
+					</div>	
+					{{#if this.errorUpload}}
+						<div><p class="txt-danger">Errore nel caricamento del video.</p></div>
+					{{/if}}
+					<label for="progressBar">Elaborazione</label>
+					<div class="progress">
+						<div class="progress-bar progress-bar-{{encodingColor}}" name="progressBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: {{progressEncode}}%">
+						    {{progressEncode}}%
+						</div>
+					</div>
+					{{#if this.errorEncoding}}
+						<div><p class="txt-danger">Errore nella conversione del video.</p></div>
+					{{/if}}
+					<div class="form-group modal-form-footer-right">
+						<button type="button" id="finishLoadBtn" class="btn btn-default {{processConcluded}}" data-dismiss="modal">OK</button>
+					</div>
+					{{/with}}
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<!-- Template per aggiunta video -->
+<template name="videoForm">
+	<form data-toggle="validator" role="form" >
+		{{#if add}}
+			<label for="{{name}}" class="control-label">Nome</label>
+			<div class="form-group form-input">
+				 <input type="text" class="form-control" name="{{name}}" placeholder="Nome video" autocomplete="off" autocorrect="off">
+			</div>
+			<label for="inputVideo" class="control-label">File</label>
+			<div class="form-group form-input">
+				 <input type="file" class="form-control" name="inputVideo">
+			</div>
+		{{else}}
+			<div class="form-group form-input">
+				 <input type="text" class="form-control" name="{{name}}" placeholder="Nome video" autocomplete="off" autocorrect="off">
+			</div>
+		{{/if}}
+		<div class="form-group modal-form-footer-right">
+			<button type="button" class="btn btn-default " data-dismiss="modal">Annulla</button>
+			<button type="submit" class="btn btn-primary">Conferma</button>
+		</div>
+	</form>
+</template>
+
+<!-- Template per aggiunta playlist -->
+<template name="playlistForm">
+	<form data-toggle="validator" role="form" >
+		<div class="form-group form-input">
+			 <input type="text" class="form-control" name="{{name}}" placeholder="Nome playlist" autocomplete="off" autocorrect="off">
+		</div>
+		<div class="form-group modal-form-footer-right">
+			<button type="button" class="btn btn-default " data-dismiss="modal">Annulla</button>
+			<button type="submit" class="btn btn-primary">Salva</button>
+		</div>
+	</form>
+</template>
+
+<!-- Template di visulizzazione playlist -->
+<template name="playlistView">
+	{{#list listId="videoPlaylistList" sectionTitle=title width=7 horizontal=true}}
+		{{#sortable items=videoPlaylistData options=videoPlaylistOpts}}
+			<a href="#" class="list-group-item hvr-fade videoPlaylistListItem">
+				<div class="video-item">
+					<div>{{name}}</div>
+					<img src="{{thumbnailPath}}">
+					<div>
+					<small>Durata: {{duration}}</small>
+					</div>
+					<div>
+						<span>
+							<a class="hvr-grow nounderline glyphicon glyphicon-trash" aria-hidden="true"></a>
+						</span>
+					</div>
+				</div>
+			</a>
+		{{/sortable}}	
+	{{/list}}
+</template>
+
+

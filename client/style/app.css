@@ -1,0 +1,265 @@
+/* CSS per vari elementi dell'interfaccia:
+ * transizione tra pagine, larghezza minima pagina, liste,
+ * barra di navigazione, popover di help... */
+
+.addBtn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+
+    color: inherit;
+
+    font-size:0.8em;
+}
+
+.addBtn:hover{
+    text-decoration: none;
+    color: blue;
+}
+
+.modal-form-footer-right {
+    text-align: right;
+}
+
+#backBtn .glyphicon-chevron-left {
+    margin-right: 0.3em;
+}
+
+#root, #wizardRoot {
+	-webkit-animation-duration: 0.4s;
+	-moz-animation-duration: 0.4s;
+	-ms-animation-duration: 0.4s;
+	-o-animation-duration: 0.4s;
+	animation-duration: 0.4s;
+
+	/*-webkit-animation-delay: 0s;
+	-moz-animation-delay: 0s;
+	-ms-animation-delay: 0s;
+	-o-animation-delay: 0s;
+	animation-delay: 0s;*/
+}
+
+#root > .container {
+    margin-top: 50px;
+}
+
+#root > .container-fluid + .container {
+    margin-top: 20px;
+}
+
+
+/* Mostra errore se la finestra non è abbastanza ampia */
+
+#wrongWidth {
+    text-align: center;
+    display:none;
+}
+
+@media (max-width: 767px) {
+    body > :not(.navbar) {
+        display: none !important;
+    }
+
+    #wrongWidth {
+        display:block !important;
+    }
+}
+
+
+.scroll-vertical-menu {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    -moz-overflow-scrolling: touch;
+    -ms-overflow-scrolling: touch;
+    -o-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+    max-height: 250px;
+}
+
+.scroll-vertical-menu.panel-body {
+   padding:0;
+}
+
+.scroll-vertical-menu-fixed {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    -moz-overflow-scrolling: touch;
+    -ms-overflow-scrolling: touch;
+    -o-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+    height: 250px;
+}
+
+.scroll-vertical-menu-fixed.panel-body {
+   padding:0;
+}
+
+
+@media (min-height: 700px) {
+    .scroll-vertical-menu {
+        max-height: 450px;
+    }
+
+    .scroll-vertical-menu-fixed {
+        height: 450px;
+    }
+}
+
+.scroll-horizontal-menu {
+    overflow-x: scroll;
+    overflow-y: hidden; 
+    -webkit-overflow-scrolling: touch;
+    -moz-overflow-scrolling: touch;
+    -ms-overflow-scrolling: touch;
+    -o-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+}
+
+.scroll-horizontal-menu.panel-body {
+   padding:0;
+}
+
+
+.list-group-horizontal {
+    white-space: nowrap;
+}
+
+.panel > .list-group-horizontal .list-group-item {
+     display: inline-block;
+     border-width: 0px 1px;
+     margin-right: -5px;
+     text-align: center;
+}
+
+.panel-heading + .list-group-horizontal .list-group-item:first-child {
+    border-left-width: 0px;
+}
+
+/*.panel > .list-group:last-child .list-group-item:last-child {
+    margin-bottom: 15px;
+}*/
+
+.panel > .list-group-horizontal:last-child .list-group-item:last-child {
+    border-right-width: 0px;
+    border-radius: 0px;
+   /* margin-right: 15px;*/
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+
+#navbar-help .overlay {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height: 100%;
+    z-index: 500;
+    background-color: rgba(0,0,0,0.05);
+}
+
+#navbar-help .overlay-top {
+    z-index: 1500;
+    background-color: transparent;
+}
+
+#navbar-help .glyphicon-question-sign {
+   /* font-size: 1.2em;*/
+    padding-left: 0.5em;
+}
+
+.user-help {
+    text-align: center;
+}
+
+.user-help .glyphicon {
+    font-size: 0.9em;
+
+}
+
+.user-help .glyphicon-pencil, .user-help .glyphicon-save {
+    color: gray;
+}
+
+.user-help .glyphicon-trash {
+    color: red;
+}
+
+
+
+@media (min-width: 768px) {
+    .popover {
+        max-width: 400px;
+    }  
+
+    .user-help {
+        max-width: 250px;
+    }
+
+    .user-help.narrow {
+        max-width: 100px;
+    }
+
+    .user-help.broad {
+        max-width: 400px;
+    }
+
+}
+
+@media (min-width: 992px) {
+    .popover {
+        max-width: 500px;
+    } 
+
+    .user-help {
+        max-width: 300px;
+    }
+
+    .user-help.narrow {
+        max-width: 120px;
+    }
+
+    .user-help.broad {
+        max-width: 500px;
+    }
+}
+
+
+
+.popover.legend {
+    position: fixed;
+    display: block;
+    top:80%;
+    left:5%;
+}  
+
+.popover.legend .user-help {
+   text-align: left;
+}
+
+.popover.legend .glyphicon {
+    padding: 0 0.5em;
+}
+
+.popover.legend .glyphicon-trash {
+   color: red;
+}
+
+.popover.legend .glyphicon-pencil {
+   color: gray;
+}
+
+
+
+/* toglie spazio dai bordi degli elementi nelle liste */
+/*.panel-body.list-group.scroll-vertical-menu, .panel-body.list-group.scroll-vertical-menu-fixed {
+    padding: 0;
+}
+
+.panel-body.list-group.scroll-horizontal-menu {
+    padding: 0;
+}*/
