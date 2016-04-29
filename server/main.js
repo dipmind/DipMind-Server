@@ -424,7 +424,7 @@ Meteor.methods({
 		
 		client.on('close', Meteor.bindEnvironment(function (had_error) {
 			if (had_error){
-				console.log('> Connessione all\'iPad fallita')
+				console.log('> Errore nella chiusura della connessione')
 				return
 			}
 
@@ -480,8 +480,8 @@ Meteor.methods({
 						var fileList
 
 						if (fs.existsSync(segmentlist_file)) {
-							data = fs.readFileSync(segmentlist_file, { encoding: 'utf8' })
-							fileList = data.split('\n')
+							d = fs.readFileSync(segmentlist_file, { encoding: 'utf8' })
+							fileList = d.split('\n')
 							if (fileList.length >= (SAVED_SEGMENTS / 2 + 2)) {
 								// una volta ricevuto un numero sufficiente di segmenti, si può attivare la funzionalità
 								// di registrazione degli eventi
@@ -489,7 +489,8 @@ Meteor.methods({
 								ready = true	
 							}
 						}
-					}					
+					}		
+	
 					
 					if (!("hb" in JSON.parse(data))) {
 						currentConnection.update({_id: connId}, {$set: {mindwave: 'ok'}})
@@ -556,7 +557,7 @@ Meteor.methods({
 			})
 
 			videoPlayerTCPServer = net.createServer(Meteor.bindEnvironment(function(socketCommand) {
-				console.log('> Comandi playback video inviati da ' + socketCommand.remoteAddress + ':' + socketCommand.remotePort)
+				console.log('> Comandi playback video inviati a ' + socketCommand.remoteAddress + ':' + socketCommand.remotePort)
 				videoPlayerClientSocket = socketCommand
 				session_sockets.push(socketCommand)
 
